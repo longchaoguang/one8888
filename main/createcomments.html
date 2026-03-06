@@ -1112,57 +1112,7 @@
             updateStats();
         }
 
-        // 保存用户偏好设置到本地存储
-        function savePreferences() {
-            const preferences = {
-                courierName: document.getElementById('courierSelect').value,
-                commentType: document.getElementById('commentType').value,
-                emojiMin: document.getElementById('emojiMin').value,
-                emojiMax: document.getElementById('emojiMax').value,
-                commentCount: document.getElementById('commentCount').value
-            };
-            localStorage.setItem('commentGeneratorPrefs', JSON.stringify(preferences));
-        }
-
-        function loadPreferences() {
-            try {
-                const saved = localStorage.getItem('commentGeneratorPrefs');
-                if (saved) {
-                    const preferences = JSON.parse(saved);
-                    
-                    if (preferences.courierName) {
-                        const courierSelect = document.getElementById('courierSelect');
-                        const optionExists = Array.from(courierSelect.options).some(
-                            opt => opt.value === preferences.courierName
-                        );
-                        if (optionExists) {
-                            courierSelect.value = preferences.courierName;
-                        }
-                    }
-                    
-                    if (preferences.commentType) {
-                        const commentType = document.getElementById('commentType');
-                        const optionExists = Array.from(commentType.options).some(
-                            opt => opt.value === preferences.commentType
-                        );
-                        if (optionExists) {
-                            commentType.value = preferences.commentType;
-                        }
-                    }
-                    
-                    if (preferences.emojiMin) document.getElementById('emojiMin').value = preferences.emojiMin;
-                    if (preferences.emojiMax) document.getElementById('emojiMax').value = preferences.emojiMax;
-                    if (preferences.commentCount) document.getElementById('commentCount').value = preferences.commentCount;
-                }
-            } catch (e) {
-                console.error('加载偏好设置失败:', e);
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            // 加载用户偏好设置
-            loadPreferences();
-            
             // 初始化输入框验证
             const inputs = document.querySelectorAll('input[type="number"]');
             inputs.forEach(input => {
@@ -1176,9 +1126,6 @@
                     if (value > max) value = max;
                     
                     this.value = value;
-                    
-                    // 保存偏好设置
-                    savePreferences();
                 });
             });
             
@@ -1193,8 +1140,6 @@
                 if (min > max) {
                     emojiMax.value = min;
                 }
-                
-                savePreferences();
             });
             
             emojiMax.addEventListener('change', function() {
@@ -1204,13 +1149,7 @@
                 if (max < min) {
                     emojiMin.value = max;
                 }
-                
-                savePreferences();
             });
-            
-            // 选择框变化时保存偏好设置
-            document.getElementById('courierSelect').addEventListener('change', savePreferences);
-            document.getElementById('commentType').addEventListener('change', savePreferences);
             
             // 初始化统计数据
             updateStats();
