@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="last-updated" content="2026-02-06">
-    <meta name="version" content="2.3.1">
+    <meta name="version" content="2.3.2">
     <meta name="description" content="评论内容生成工具，带相册弹窗与图片保存，仅供学习交流">
     <title>小红薯内容生成工具 · 相册完整版</title>
     <style>
@@ -86,7 +86,7 @@
             transform: scale(0.98);
         }
 
-        /* 图片展示区域 */
+        /* 图片展示区域 - 保留结构但隐藏内容（可以保留或移除，这里保留骨架以防万一） */
         .gallery-section {
             background: #ffffff;
             padding: 15px 15px 5px 15px;
@@ -637,226 +637,9 @@
             }
         }
 
-        /* 弹窗样式 */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.75);
+        /* 弹窗样式 (虽然不用了，但保留定义防止控制台报错) */
+        .modal-overlay, .preview-overlay {
             display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            backdrop-filter: blur(4px);
-            padding: 15px;
-        }
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 1000px;
-            aspect-ratio: 16 / 9;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            overflow: hidden;
-            animation: modalFadeIn 0.3s;
-        }
-        .modal-content.aspect-4-3 {
-            aspect-ratio: 4 / 3;
-        }
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            background: #f1f3f5;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .modal-header h3 {
-            font-size: 18px;
-            color: #212529;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .modal-header h3 i {
-            color: #1c7ed6;
-        }
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #495057;
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        .modal-close:hover {
-            background: #dee2e6;
-            color: #000;
-        }
-        .modal-body {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f8f9fa;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 16px;
-            align-content: flex-start;
-        }
-        .modal-image-item {
-            background: white;
-            border-radius: 12px;
-            padding: 12px 8px 8px 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: 0.2s;
-            cursor: pointer;
-            border: 1px solid #e9ecef;
-        }
-        .modal-image-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            border-color: #adb5bd;
-        }
-        .modal-image-item img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            border-radius: 8px;
-            background: #dee2e6;
-            margin-bottom: 8px;
-            border: 1px solid #ced4da;
-        }
-        .modal-image-label {
-            font-size: 13px;
-            color: #495057;
-            font-weight: 500;
-        }
-        .modal-image-save {
-            margin-top: 6px;
-            background: #40c057;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 6px 12px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 500;
-            width: 100%;
-            justify-content: center;
-        }
-        .modal-image-save i {
-            font-size: 12px;
-        }
-        .modal-image-save:hover {
-            background: #2f9e44;
-        }
-        .modal-image-save.saved {
-            background: #51cf66;
-            pointer-events: none;
-            opacity: 0.7;
-        }
-
-        /* 优化预览层：手机端更高，更易看 */
-        .preview-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 11000;
-            flex-direction: column;
-            backdrop-filter: blur(12px);
-            padding: 10px;  /* 给一点内边距防止贴边 */
-        }
-        .preview-image {
-            max-width: 98%;
-            max-height: 85vh;    /* 手机端让高度占满大部分视口，解决“太矮”问题 */
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-        .preview-close {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            font-size: 28px;
-            width: 50px; height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.3);
-            z-index: 10;
-        }
-        .preview-close:hover {
-            background: rgba(255,255,255,0.4);
-        }
-        .preview-save {
-            margin-top: 16px;
-            background: #40c057;
-            color: white;
-            border: none;
-            border-radius: 40px;
-            padding: 12px 30px;
-            font-size: 18px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .preview-save i {
-            font-size: 20px;
-        }
-        .preview-save:active { transform: scale(0.96); }
-
-        /* 小屏进一步优化 */
-        @media (max-width: 480px) {
-            .preview-image {
-                max-height: 80vh;   /* 确保在很小屏幕上也够高 */
-            }
-            .preview-close {
-                top: 15px;
-                right: 15px;
-                width: 44px;
-                height: 44px;
-                font-size: 24px;
-            }
-            .preview-save {
-                padding: 10px 20px;
-                font-size: 16px;
-                margin-top: 12px;
-            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -864,12 +647,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-comments"></i> 小红薯评论生成器 V2.31</h1>
-            <p>仅用于学习交流 · 点击相册按钮浏览保存图片</p>
+            <h1><i class="fas fa-comments"></i> 小红薯评论生成器 V2.32</h1>
+            <p>仅用于学习交流 · 点击相册按钮浏览文档</p>
         </div>
 
         <div class="action-bar">
-            <button class="btn-album" id="openAlbumBtn"><i class="fas fa-images"></i> 打开相册 (16:9)</button>
+            <button class="btn-album" id="openAlbumBtn"><i class="fas fa-book-open"></i> 打开相册文档</button>
         </div>
 
         <div class="controls">
@@ -960,25 +743,9 @@
         </div>
     </div>
 
-    <!-- 相册弹窗 -->
-    <div class="modal-overlay" id="albumModal">
-        <div class="modal-content" id="modalContent">
-            <div class="modal-header">
-                <h3><i class="fas fa-images"></i> 全部图片 · 点击图片可放大预览</h3>
-                <button class="modal-close" id="closeModalBtn"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <div style="grid-column:1/-1; text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i> 加载图片清单...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 大图预览层 (优化后) -->
-    <div class="preview-overlay" id="previewOverlay">
-        <button class="preview-close" id="closePreviewBtn"><i class="fas fa-times"></i></button>
-        <img class="preview-image" id="previewImg" src="" alt="">
-        <button class="preview-save" id="previewSaveBtn"><i class="fas fa-download"></i> 保存到相册</button>
-    </div>
+    <!-- 原来的弹窗层可以移除，但为了简化代码，保留空壳防止引用错误，但隐藏 -->
+    <div class="modal-overlay" id="albumModal" style="display:none;"></div>
+    <div class="preview-overlay" id="previewOverlay" style="display:none;"></div>
 
     <script>
         // ==================== 模板数据 ====================
@@ -1024,7 +791,6 @@
         let generatedComments = [];
         let usedFirstSentences = new Set();
         let selectedComments = new Set();
-        let imageList = [];
 
         // ==================== 工具函数 ====================
         function showCopySuccess(button, text = '已复制') {
@@ -1422,134 +1188,13 @@
             }
         }
 
-        // ==================== 图片相关函数 (支持png/jpg/jpeg) ====================
-        function imageExists(url) {
-            return new Promise(resolve => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => resolve(false);
-                img.src = url;
-            });
-        }
-
-        async function scanImages() {
-            const basePath = '../image/';
-            const extensions = ['jpg', 'jpeg', 'png'];  // 支持多种格式
-            let loaded = [];
-            let index = 1;
-            // 为了防止无限循环，我们尝试每个序号最多三种扩展名，直到连续5个序号都不存在为止
-            let missingCount = 0;
-            const maxMissing = 5;   // 连续5个序号都没有图片则停止扫描
-            
-            while (missingCount < maxMissing) {
-                let foundAny = false;
-                for (const ext of extensions) {
-                    const filename = `${index}.${ext}`;
-                    const path = `${basePath}${filename}`;
-                    if (await imageExists(path)) {
-                        loaded.push({ path, label: filename, index });
-                        foundAny = true;
-                        break; // 找到一个即可，避免重复添加同一个序号不同后缀
-                    }
-                }
-                if (foundAny) {
-                    missingCount = 0;   // 重置连续缺失计数
-                } else {
-                    missingCount++;
-                }
-                index++;
-                // 防止死循环，最大尝试200次（足够覆盖大多数情况）
-                if (index > 200) break;
-            }
-            return loaded;
-        }
-
-        async function refreshGalleryPreview() {
-            const container = document.getElementById('galleryContainer');
-            container.innerHTML = '<div class="gallery-loading"><i class="fas fa-spinner fa-pulse"></i> 加载图片...</div>';
-            const images = await scanImages();
-            imageList = images;
-            if (images.length === 0) {
-                container.innerHTML = '<div class="gallery-empty"><i class="far fa-image"></i> 未找到图片</div>';
-                return;
-            }
-            let html = '';
-            images.forEach(img => {
-                html += `<div class="gallery-item" onclick="openPreview('${img.path}')">
-                    <img src="${img.path}" alt="${img.label}" loading="lazy" onerror="this.style.display='none';this.parentElement.style.display='none';">
-                    <div class="img-label">${img.label}</div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        async function openAlbumModal() {
-            const modal = document.getElementById('albumModal');
-            const modalBody = document.getElementById('modalBody');
-            modalBody.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i> 加载图片...</div>';
-            modal.style.display = 'flex';
-
-            const images = await scanImages();
-            imageList = images;
-            if (images.length === 0) {
-                modalBody.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#868e96;"><i class="far fa-frown"></i> 未在上一级image文件夹找到图片</div>';
-                return;
-            }
-
-            let gridHtml = '';
-            images.forEach(img => {
-                gridHtml += `
-                    <div class="modal-image-item">
-                        <img src="${img.path}" alt="${img.label}" onclick="openPreview('${img.path}')">
-                        <span class="modal-image-label">${img.label}</span>
-                        <button class="modal-image-save" onclick="saveImageToPhone('${img.path}', this)"><i class="fas fa-download"></i> 保存</button>
-                    </div>
-                `;
-            });
-            modalBody.innerHTML = gridHtml;
-        }
-
-        function openPreview(imgPath) {
-            const overlay = document.getElementById('previewOverlay');
-            const previewImg = document.getElementById('previewImg');
-            previewImg.src = imgPath;
-            overlay.style.display = 'flex';
-            document.getElementById('previewSaveBtn').setAttribute('data-current', imgPath);
-        }
-
-        function saveImageToPhone(imgPath, btnElement) {
-            const link = document.createElement('a');
-            link.href = imgPath;
-            link.download = imgPath.substring(imgPath.lastIndexOf('/') + 1);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            if (btnElement) {
-                const originalText = btnElement.innerHTML;
-                btnElement.innerHTML = '<i class="fas fa-check"></i> 已保存';
-                btnElement.classList.add('saved');
-                setTimeout(() => {
-                    btnElement.innerHTML = originalText;
-                    btnElement.classList.remove('saved');
-                }, 2000);
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('albumModal').style.display = 'none';
-        }
-
-        function closePreview() {
-            document.getElementById('previewOverlay').style.display = 'none';
+        // ==================== 新相册跳转函数 ====================
+        function openYuqueDoc() {
+            const url = 'https://www.yuque.com/xiaoxiaozaibeipiao/ilda0o/gnyszpv7e07x7bpc?singleDoc#'; // 完整链接
+            window.open(url, '_blank'); // 新标签页打开
         }
 
         // 挂载到全局
-        window.openPreview = openPreview;
-        window.saveImageToPhone = saveImageToPhone;
-        window.closeModal = closeModal;
-        window.closePreview = closePreview;
-        window.openAlbumModal = openAlbumModal;
         window.generateComments = generateComments;
         window.clearComments = clearComments;
         window.toggleCommentSelection = toggleCommentSelection;
@@ -1558,6 +1203,7 @@
         window.cancelSelection = cancelSelection;
         window.copySelectedComments = copySelectedComments;
         window.copySingleComment = copySingleComment;
+        window.openYuqueDoc = openYuqueDoc; // 新函数
 
         // ==================== 初始化 ====================
         document.addEventListener('DOMContentLoaded', () => {
@@ -1598,23 +1244,9 @@
             document.getElementById('commentType').addEventListener('change', savePreferences);
             
             updateStats();
-            // 注意：这里原本有refreshGalleryPreview，但页面中可能没有galleryContainer，所以忽略或保留备用
-            // 但我们仍然定义它供后续使用
 
-            // 按钮事件
-            document.getElementById('openAlbumBtn').addEventListener('click', openAlbumModal);
-            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-            document.getElementById('closePreviewBtn').addEventListener('click', closePreview);
-            document.getElementById('previewOverlay').addEventListener('click', function(e) {
-                if (e.target === this) closePreview();
-            });
-            document.getElementById('albumModal').addEventListener('click', function(e) {
-                if (e.target === this) closeModal();
-            });
-            document.getElementById('previewSaveBtn').addEventListener('click', function() {
-                const path = this.getAttribute('data-current');
-                if (path) saveImageToPhone(path, this);
-            });
+            // 按钮事件 —— 绑定到新函数
+            document.getElementById('openAlbumBtn').addEventListener('click', openYuqueDoc);
         });
     </script>
 </body>
