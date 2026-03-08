@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="last-updated" content="2026-02-06">
-    <meta name="version" content="2.1.0">
-    <meta name="description" content="评论内容生成工具，仅供学习交流">
-    <title>小红薯内容生成工具</title>
+    <meta name="version" content="2.3.0">
+    <meta name="description" content="评论内容生成工具，带相册弹窗与图片保存，仅供学习交流">
+    <title>小红薯内容生成工具 · 相册完整版</title>
     <style>
         * {
             margin: 0;
@@ -52,6 +52,117 @@
             line-height: 1.4;
         }
 
+        /* 相册按钮行 */
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .btn-album {
+            background: #4dabf7;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn-album i {
+            font-size: 16px;
+        }
+        .btn-album:hover {
+            background: #339af0;
+            transform: scale(1.02);
+        }
+        .btn-album:active {
+            transform: scale(0.98);
+        }
+
+        /* 图片展示区域 */
+        .gallery-section {
+            background: #ffffff;
+            padding: 15px 15px 5px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .gallery-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .gallery-title i {
+            color: #1c7ed6;
+        }
+        .gallery-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 16px;
+            padding-bottom: 15px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+        }
+        .gallery-scroll::-webkit-scrollbar {
+            height: 5px;
+        }
+        .gallery-scroll::-webkit-scrollbar-track {
+            background: #f1f3f5;
+        }
+        .gallery-scroll::-webkit-scrollbar-thumb {
+            background: #adb5bd;
+            border-radius: 10px;
+        }
+        .gallery-item {
+            flex: 0 0 auto;
+            width: 100px;
+            text-align: center;
+            border-radius: 8px;
+            background: #f8f9fa;
+            padding: 8px 5px 5px 5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .gallery-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+        }
+        .gallery-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #dee2e6;
+            border: 1px solid #ced4da;
+            pointer-events: none;
+        }
+        .gallery-item .img-label {
+            font-size: 12px;
+            color: #495057;
+            margin-top: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .gallery-loading, .gallery-empty {
+            font-size: 14px;
+            color: #868e96;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* 控件区域 */
         .controls {
             padding: 15px 15px;
             background: #f8f9fa;
@@ -525,14 +636,214 @@
                 justify-content: center;
             }
         }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+            padding: 15px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 1000px;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+            animation: modalFadeIn 0.3s;
+        }
+        .modal-content.aspect-4-3 {
+            aspect-ratio: 4 / 3;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            color: #212529;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-header h3 i {
+            color: #1c7ed6;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #495057;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .modal-close:hover {
+            background: #dee2e6;
+            color: #000;
+        }
+        .modal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            align-content: flex-start;
+        }
+        .modal-image-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 8px 8px 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: 0.2s;
+            cursor: pointer;
+            border: 1px solid #e9ecef;
+        }
+        .modal-image-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: #adb5bd;
+        }
+        .modal-image-item img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #dee2e6;
+            margin-bottom: 8px;
+            border: 1px solid #ced4da;
+        }
+        .modal-image-label {
+            font-size: 13px;
+            color: #495057;
+            font-weight: 500;
+        }
+        .modal-image-save {
+            margin-top: 6px;
+            background: #40c057;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 12px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            width: 100%;
+            justify-content: center;
+        }
+        .modal-image-save i {
+            font-size: 12px;
+        }
+        .modal-image-save:hover {
+            background: #2f9e44;
+        }
+        .modal-image-save.saved {
+            background: #51cf66;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .preview-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 11000;
+            flex-direction: column;
+            backdrop-filter: blur(8px);
+        }
+        .preview-image {
+            max-width: 90%;
+            max-height: 80%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid white;
+        }
+        .preview-close {
+            position: absolute;
+            top: 30px; right: 30px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            font-size: 30px;
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .preview-close:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        .preview-save {
+            margin-top: 20px;
+            background: #40c057;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .preview-save i {
+            font-size: 20px;
+        }
+        .preview-save:active { transform: scale(0.96); }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-comments"></i> 小红书评论生成器 V2.0</h1>
-            <p>仅用于学习交流，不得用于非法用途</p>
+            <h1><i class="fas fa-comments"></i> 小红薯评论生成器 V2.3</h1>
+            <p>仅用于学习交流 · 点击相册按钮浏览保存图片</p>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn-album" id="openAlbumBtn"><i class="fas fa-images"></i> 打开相册 (16:9)</button>
         </div>
 
         <div class="controls">
@@ -623,31 +934,42 @@
         </div>
     </div>
 
+    <!-- 相册弹窗 -->
+    <div class="modal-overlay" id="albumModal">
+        <div class="modal-content" id="modalContent">
+            <div class="modal-header">
+                <h3><i class="fas fa-images"></i> 全部图片 · 点击图片可放大预览</h3>
+                <button class="modal-close" id="closeModalBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div style="grid-column:1/-1; text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i> 加载图片清单...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 大图预览层 -->
+    <div class="preview-overlay" id="previewOverlay">
+        <button class="preview-close" id="closePreviewBtn"><i class="fas fa-times"></i></button>
+        <img class="preview-image" id="previewImg" src="" alt="">
+        <button class="preview-save" id="previewSaveBtn"><i class="fas fa-download"></i> 保存到相册</button>
+    </div>
+
     <script>
-        // 模板数据结构 - 每个模板包含类型和内容
+        // ==================== 模板数据 ====================
         const firstSentenceTemplates = [
-            // 出物类（卖闲置）
             {type: "出物类", template: "你们出物都不怎么用 {}吗？ 非偏4-6这样子"},
             {type: "出物类", template: "你们出闲置寄快递不怎么用 {} 吗？ 非偏4-6那样"},
             {type: "出物类", template: "你们出物都不怎么用 {}吗？ 非偏4-6那样"},
             {type: "出物类", template: "你们出闲置寄快递不怎么用 {} 吗？ 非偏4-6那样"},
-            
-            // 寄闲置类（退换货/二手书）
             {type: "寄闲置类", template: "你们退换货一般都不用 {}吗？ 非偏4-6那样"},
             {type: "寄闲置类", template: "好奇你们寄二手书不用 {} 吗？非偏4-6那样"},
             {type: "寄闲置类", template: "你们退换货寄快递不用 {} 吗？ 非偏4-6那样"},
-            
-            // 寄衣服类（换季衣服）
             {type: "寄衣服类", template: "你们寄换季衣服不用 {}的吗？，非偏4-6那样"},
             {type: "寄衣服类", template: "你们寄换季衣服不用 {}吗？非偏远的话4-6这样子"},
-
-            // 普通快递类（通用）
             {type: "寄谷子", template: "你们平时寄谷子快递不用 {}？ 非偏4-6那样"},
             {type: "寄谷子", template: "你们寄谷子快递不用 {}吗？ 非偏4-6那样"},
             {type: "寄谷子", template: "你们寄周边没有看到plq {}吗？ 非偏4-6那样"},
             {type: "寄谷子", template: "你们寄谷子件不用 {}吗？ 非偏4-6那样"},
-            
-            // 普通快递类（通用）
             {type: "普通快递类", template: "你们平时寄快递不用 {}？ 非偏4-6那样"},
             {type: "普通快递类", template: "你们寄快递不用 {}吗？ 非偏4-6那样"},
             {type: "普通快递类", template: "你们没有看到plq {}吗？ 非偏4-6那样"},
@@ -672,16 +994,17 @@
             "[扶墙R]", "[doge]"
         ];
 
+        // ==================== 全局变量 ====================
         let generatedComments = [];
         let usedFirstSentences = new Set();
         let selectedComments = new Set();
+        let imageList = [];
 
+        // ==================== 工具函数 ====================
         function showCopySuccess(button, text = '已复制') {
             const originalHTML = button.innerHTML;
-            
             button.innerHTML = `<i class="fas fa-check"></i> ${text}`;
             button.classList.add('copied');
-            
             setTimeout(() => {
                 button.innerHTML = originalHTML;
                 button.classList.remove('copied');
@@ -691,13 +1014,11 @@
         function getRandomEmojiCount() {
             const min = parseInt(document.getElementById('emojiMin').value) || 3;
             const max = parseInt(document.getElementById('emojiMax').value) || 5;
-            
             if (min > max) {
                 document.getElementById('emojiMin').value = max;
                 document.getElementById('emojiMax').value = min;
                 return Math.floor(Math.random() * (min - max + 1)) + max;
             }
-            
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
@@ -712,22 +1033,14 @@
             const segments = cleanedText.split(/(?=[，。！？,.!?])/);
             const validSegments = segments.filter(seg => seg.trim());
             
-            if (validSegments.length <= 1) {
-                return cleanedText;
-            }
+            if (validSegments.length <= 1) return cleanedText;
             
             const insertPositions = [];
-            for (let i = 0; i < validSegments.length; i++) {
-                insertPositions.push(i + 1);
-            }
-            
-            if (insertPositions.length === 0) {
-                return cleanedText;
-            }
+            for (let i = 0; i < validSegments.length; i++) insertPositions.push(i + 1);
+            if (insertPositions.length === 0) return cleanedText;
             
             const positionsToInsert = [];
             const availablePositions = Math.min(emojiCount, insertPositions.length - 1);
-            
             const tempPositions = [...insertPositions];
             tempPositions.pop();
             
@@ -751,49 +1064,33 @@
 
         function getUniqueFirstSentence(courierName) {
             const commentType = document.getElementById('commentType').value;
-            
-            // 根据选择的类型筛选模板
             let availableTemplates;
-            
             if (commentType === 'all') {
                 availableTemplates = firstSentenceTemplates;
             } else {
-                availableTemplates = firstSentenceTemplates.filter(
-                    template => template.type === commentType
-                );
+                availableTemplates = firstSentenceTemplates.filter(t => t.type === commentType);
             }
+            if (availableTemplates.length === 0) availableTemplates = firstSentenceTemplates;
             
-            if (availableTemplates.length === 0) {
-                // 如果没有该类型的模板，使用所有模板
-                availableTemplates = firstSentenceTemplates;
-            }
-            
-            // 过滤已使用的句子
             let filteredTemplates = availableTemplates.filter(template => {
                 const sentence = template.template.replace('{}', courierName);
                 return !usedFirstSentences.has(sentence);
             });
             
-            // 如果所有模板都已使用过，清空已用记录
             if (filteredTemplates.length === 0) {
                 usedFirstSentences.clear();
                 filteredTemplates = availableTemplates;
             }
             
-            // 随机选择一个模板
             const chosenTemplate = filteredTemplates[Math.floor(Math.random() * filteredTemplates.length)];
             const firstSentence = chosenTemplate.template.replace('{}', courierName);
             usedFirstSentences.add(firstSentence);
             
-            return {
-                text: firstSentence,
-                type: chosenTemplate.type
-            };
+            return { text: firstSentence, type: chosenTemplate.type };
         }
 
         function generateRandomComment() {
             const courierName = document.getElementById('courierSelect').value;
-            
             const firstSentenceData = getUniqueFirstSentence(courierName);
             const firstSentence = firstSentenceData.text;
             const commentType = firstSentenceData.type;
@@ -823,7 +1120,6 @@
             });
             
             let combinedComment = processedParts.join('');
-            
             const emojiCount = getRandomEmojiCount();
             combinedComment = insertEmojis(combinedComment, emojiCount);
             
@@ -839,18 +1135,13 @@
         function updateSelectedCount() {
             const selectedCount = selectedComments.size;
             document.getElementById('selectedCount').textContent = selectedCount;
-            
             const bottomBar = document.getElementById('selectionBottomBar');
-            if (selectedCount > 0) {
-                bottomBar.classList.add('show');
-            } else {
-                bottomBar.classList.remove('show');
-            }
+            if (selectedCount > 0) bottomBar.classList.add('show');
+            else bottomBar.classList.remove('show');
         }
 
         function updateStats() {
             const stats = document.getElementById('stats');
-            
             if (generatedComments.length === 0) {
                 stats.textContent = '就绪';
             } else {
@@ -858,7 +1149,6 @@
                 const commentType = document.getElementById('commentType').value;
                 const emojiMin = document.getElementById('emojiMin').value || 3;
                 const emojiMax = document.getElementById('emojiMax').value || 5;
-                
                 const typeDisplay = commentType === 'all' ? '全部类型' : commentType;
                 stats.textContent = `已生成 ${generatedComments.length} 条评论，快递: ${courierName}，类型: ${typeDisplay}，表情: ${emojiMin}-${emojiMax}个`;
             }
@@ -866,14 +1156,9 @@
 
         function toggleCommentSelection(commentId) {
             const checkbox = document.getElementById(`checkbox-${commentId}`);
-            
             if (checkbox) {
-                if (checkbox.checked) {
-                    selectedComments.add(commentId);
-                } else {
-                    selectedComments.delete(commentId);
-                }
-                
+                if (checkbox.checked) selectedComments.add(commentId);
+                else selectedComments.delete(commentId);
                 updateSelectedCount();
             }
         }
@@ -894,11 +1179,8 @@
                 const checkbox = document.getElementById(`checkbox-${comment.id}`);
                 if (checkbox) {
                     checkbox.checked = !checkbox.checked;
-                    if (checkbox.checked) {
-                        selectedComments.add(comment.id);
-                    } else {
-                        selectedComments.delete(comment.id);
-                    }
+                    if (checkbox.checked) selectedComments.add(comment.id);
+                    else selectedComments.delete(comment.id);
                 }
             });
             updateSelectedCount();
@@ -908,9 +1190,7 @@
             selectedComments.clear();
             generatedComments.forEach(comment => {
                 const checkbox = document.getElementById(`checkbox-${comment.id}`);
-                if (checkbox) {
-                    checkbox.checked = false;
-                }
+                if (checkbox) checkbox.checked = false;
             });
             updateSelectedCount();
         }
@@ -918,44 +1198,29 @@
         function copyTextToClipboard(text) {
             return new Promise((resolve, reject) => {
                 if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(text)
-                        .then(resolve)
-                        .catch(() => {
-                            fallbackCopyTextToClipboard(text, resolve, reject);
-                        });
+                    navigator.clipboard.writeText(text).then(resolve).catch(() => fallbackCopy(text, resolve, reject));
                 } else {
-                    fallbackCopyTextToClipboard(text, resolve, reject);
+                    fallbackCopy(text, resolve, reject);
                 }
             });
         }
 
-        function fallbackCopyTextToClipboard(text, resolve, reject) {
+        function fallbackCopy(text, resolve, reject) {
             const textArea = document.createElement('textarea');
             textArea.value = text;
-            
             textArea.style.position = 'fixed';
             textArea.style.top = '0';
             textArea.style.left = '0';
             textArea.style.width = '2em';
             textArea.style.height = '2em';
-            textArea.style.padding = '0';
-            textArea.style.border = 'none';
-            textArea.style.outline = 'none';
-            textArea.style.boxShadow = 'none';
-            textArea.style.background = 'transparent';
-            
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            
             try {
                 const successful = document.execCommand('copy');
                 document.body.removeChild(textArea);
-                if (successful) {
-                    resolve();
-                } else {
-                    reject(new Error('复制命令失败'));
-                }
+                if (successful) resolve();
+                else reject(new Error('复制命令失败'));
             } catch (err) {
                 document.body.removeChild(textArea);
                 reject(err);
@@ -966,17 +1231,13 @@
             try {
                 const comment = generatedComments.find(c => c.id === commentId);
                 if (!comment) return;
-                
                 const contentElement = document.getElementById(`content-${commentId}`);
                 if (!contentElement) return;
-                
                 const text = contentElement.textContent || contentElement.innerText;
                 const cleanText = text.replace(/\s+/g, ' ').trim();
                 
                 copyTextToClipboard(cleanText)
-                    .then(() => {
-                        showCopySuccess(button);
-                    })
+                    .then(() => showCopySuccess(button))
                     .catch(err => {
                         console.error('复制失败:', err);
                         button.innerHTML = '<i class="fas fa-exclamation-circle"></i> 失败';
@@ -994,7 +1255,6 @@
         function copySelectedComments() {
             try {
                 if (selectedComments.size === 0) return;
-                
                 const selectedTexts = [];
                 selectedComments.forEach(commentId => {
                     const comment = generatedComments.find(c => c.id === commentId);
@@ -1007,9 +1267,7 @@
                         }
                     }
                 });
-                
                 if (selectedTexts.length === 0) return;
-                
                 const allText = selectedTexts.join('\n\n');
                 
                 copyTextToClipboard(allText)
@@ -1018,14 +1276,10 @@
                         if (copyBtn) {
                             const originalHTML = copyBtn.innerHTML;
                             copyBtn.innerHTML = `<i class="fas fa-check"></i> 已复制`;
-                            setTimeout(() => {
-                                copyBtn.innerHTML = originalHTML;
-                            }, 2000);
+                            setTimeout(() => { copyBtn.innerHTML = originalHTML; }, 2000);
                         }
                     })
-                    .catch(err => {
-                        console.error('复制失败:', err);
-                    });
+                    .catch(err => console.error('复制失败:', err));
             } catch (error) {
                 console.error('复制选中评论时出错:', error);
             }
@@ -1034,10 +1288,7 @@
         function generateComments() {
             try {
                 const count = parseInt(document.getElementById('commentCount').value) || 3;
-                
-                if (isNaN(count) || count < 1) {
-                    return;
-                }
+                if (isNaN(count) || count < 1) return;
                 
                 usedFirstSentences.clear();
                 selectedComments.clear();
@@ -1047,9 +1298,7 @@
                 commentsList.innerHTML = '';
                 
                 const emptyState = document.getElementById('emptyState');
-                if (emptyState) {
-                    emptyState.style.display = 'none';
-                }
+                if (emptyState) emptyState.style.display = 'none';
                 
                 for (let i = 0; i < count; i++) {
                     const comment = generateRandomComment();
@@ -1089,7 +1338,7 @@
                 }
                 
                 updateStats();
-                
+                cancelSelection(); // 隐藏底部栏
             } catch (error) {
                 console.error('生成评论时出错:', error);
             }
@@ -1112,47 +1361,214 @@
             updateStats();
         }
 
+        function savePreferences() {
+            const preferences = {
+                courierName: document.getElementById('courierSelect').value,
+                commentType: document.getElementById('commentType').value,
+                emojiMin: document.getElementById('emojiMin').value,
+                emojiMax: document.getElementById('emojiMax').value,
+                commentCount: document.getElementById('commentCount').value
+            };
+            localStorage.setItem('commentGeneratorPrefs', JSON.stringify(preferences));
+        }
+
+        function loadPreferences() {
+            try {
+                const saved = localStorage.getItem('commentGeneratorPrefs');
+                if (saved) {
+                    const preferences = JSON.parse(saved);
+                    if (preferences.courierName) {
+                        const courierSelect = document.getElementById('courierSelect');
+                        const optionExists = Array.from(courierSelect.options).some(opt => opt.value === preferences.courierName);
+                        if (optionExists) courierSelect.value = preferences.courierName;
+                    }
+                    if (preferences.commentType) {
+                        const commentType = document.getElementById('commentType');
+                        const optionExists = Array.from(commentType.options).some(opt => opt.value === preferences.commentType);
+                        if (optionExists) commentType.value = preferences.commentType;
+                    }
+                    if (preferences.emojiMin) document.getElementById('emojiMin').value = preferences.emojiMin;
+                    if (preferences.emojiMax) document.getElementById('emojiMax').value = preferences.emojiMax;
+                    if (preferences.commentCount) document.getElementById('commentCount').value = preferences.commentCount;
+                }
+            } catch (e) {
+                console.error('加载偏好设置失败:', e);
+            }
+        }
+
+        // ==================== 图片相关函数 ====================
+        function imageExists(url) {
+            return new Promise(resolve => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        async function scanImages() {
+            const maxTry = 30;
+            const basePath = '../image/';
+            let loaded = [];
+            for (let i = 1; i <= maxTry; i++) {
+                const path = `${basePath}${i}.jpg`;
+                if (await imageExists(path)) {
+                    loaded.push({ path, label: `${i}.jpg`, index: i });
+                }
+            }
+            return loaded;
+        }
+
+        async function refreshGalleryPreview() {
+            const container = document.getElementById('galleryContainer');
+            container.innerHTML = '<div class="gallery-loading"><i class="fas fa-spinner fa-pulse"></i> 加载图片...</div>';
+            const images = await scanImages();
+            imageList = images;
+            if (images.length === 0) {
+                container.innerHTML = '<div class="gallery-empty"><i class="far fa-image"></i> 未找到图片</div>';
+                return;
+            }
+            let html = '';
+            images.forEach(img => {
+                html += `<div class="gallery-item" onclick="openPreview('${img.path}')">
+                    <img src="${img.path}" alt="${img.label}" loading="lazy" onerror="this.style.display='none';this.parentElement.style.display='none';">
+                    <div class="img-label">${img.label}</div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        async function openAlbumModal() {
+            const modal = document.getElementById('albumModal');
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i> 加载图片...</div>';
+            modal.style.display = 'flex';
+
+            const images = await scanImages();
+            imageList = images;
+            if (images.length === 0) {
+                modalBody.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#868e96;"><i class="far fa-frown"></i> 未在上一级image文件夹找到图片</div>';
+                return;
+            }
+
+            let gridHtml = '';
+            images.forEach(img => {
+                gridHtml += `
+                    <div class="modal-image-item">
+                        <img src="${img.path}" alt="${img.label}" onclick="openPreview('${img.path}')">
+                        <span class="modal-image-label">${img.label}</span>
+                        <button class="modal-image-save" onclick="saveImageToPhone('${img.path}', this)"><i class="fas fa-download"></i> 保存</button>
+                    </div>
+                `;
+            });
+            modalBody.innerHTML = gridHtml;
+        }
+
+        function openPreview(imgPath) {
+            const overlay = document.getElementById('previewOverlay');
+            const previewImg = document.getElementById('previewImg');
+            previewImg.src = imgPath;
+            overlay.style.display = 'flex';
+            document.getElementById('previewSaveBtn').setAttribute('data-current', imgPath);
+        }
+
+        function saveImageToPhone(imgPath, btnElement) {
+            const link = document.createElement('a');
+            link.href = imgPath;
+            link.download = imgPath.substring(imgPath.lastIndexOf('/') + 1);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            if (btnElement) {
+                const originalText = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="fas fa-check"></i> 已保存';
+                btnElement.classList.add('saved');
+                setTimeout(() => {
+                    btnElement.innerHTML = originalText;
+                    btnElement.classList.remove('saved');
+                }, 2000);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('albumModal').style.display = 'none';
+        }
+
+        function closePreview() {
+            document.getElementById('previewOverlay').style.display = 'none';
+        }
+
+        // 挂载到全局
+        window.openPreview = openPreview;
+        window.saveImageToPhone = saveImageToPhone;
+        window.closeModal = closeModal;
+        window.closePreview = closePreview;
+        window.openAlbumModal = openAlbumModal;
+        window.generateComments = generateComments;
+        window.clearComments = clearComments;
+        window.toggleCommentSelection = toggleCommentSelection;
+        window.selectAllComments = selectAllComments;
+        window.invertSelection = invertSelection;
+        window.cancelSelection = cancelSelection;
+        window.copySelectedComments = copySelectedComments;
+        window.copySingleComment = copySingleComment;
+
+        // ==================== 初始化 ====================
         document.addEventListener('DOMContentLoaded', () => {
-            // 初始化输入框验证
+            loadPreferences();
+            
             const inputs = document.querySelectorAll('input[type="number"]');
             inputs.forEach(input => {
                 input.addEventListener('change', function() {
                     let value = parseInt(this.value);
                     const min = parseInt(this.min) || 1;
                     const max = parseInt(this.max) || 50;
-                    
                     if (isNaN(value)) value = this.defaultValue || 10;
                     if (value < min) value = min;
                     if (value > max) value = max;
-                    
                     this.value = value;
+                    savePreferences();
                 });
             });
             
-            // 表情数量范围验证
             const emojiMin = document.getElementById('emojiMin');
             const emojiMax = document.getElementById('emojiMax');
             
             emojiMin.addEventListener('change', function() {
                 const min = parseInt(this.value) || 3;
                 const max = parseInt(emojiMax.value) || 5;
-                
-                if (min > max) {
-                    emojiMax.value = min;
-                }
+                if (min > max) emojiMax.value = min;
+                savePreferences();
             });
             
             emojiMax.addEventListener('change', function() {
                 const min = parseInt(emojiMin.value) || 3;
                 const max = parseInt(this.value) || 5;
-                
-                if (max < min) {
-                    emojiMin.value = max;
-                }
+                if (max < min) emojiMin.value = max;
+                savePreferences();
             });
             
-            // 初始化统计数据
+            document.getElementById('courierSelect').addEventListener('change', savePreferences);
+            document.getElementById('commentType').addEventListener('change', savePreferences);
+            
             updateStats();
+            refreshGalleryPreview();
+
+            // 按钮事件
+            document.getElementById('openAlbumBtn').addEventListener('click', openAlbumModal);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('closePreviewBtn').addEventListener('click', closePreview);
+            document.getElementById('previewOverlay').addEventListener('click', function(e) {
+                if (e.target === this) closePreview();
+            });
+            document.getElementById('albumModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            document.getElementById('previewSaveBtn').addEventListener('click', function() {
+                const path = this.getAttribute('data-current');
+                if (path) saveImageToPhone(path, this);
+            });
         });
     </script>
 </body>
